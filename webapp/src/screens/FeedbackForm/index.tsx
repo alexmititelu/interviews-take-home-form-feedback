@@ -7,6 +7,7 @@ import {
   Typography,
   Rating,
   Button,
+  Container,
 } from "@mui/material";
 import validator from "validator";
 import { useNavigate } from "react-router-dom";
@@ -138,99 +139,100 @@ function FeedbackForm() {
   };
 
   return (
-    <Grid
-      container
-      justifyContent="center"
-      style={{ height: "100vh" }}
-      alignItems="center"
+    <Container
+      style={{
+        display: "flex",
+        height: "100vh",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+      maxWidth="md"
     >
-      <Grid item>
-        <form
-          onSubmit={handleSubmit}
-          onChange={handleFieldChange}
-          autoComplete="on"
-        >
-          <Grid container>
-            <Typography variant="h5" gutterBottom>
-              Feedback Form
-            </Typography>
+      <form
+        onSubmit={handleSubmit}
+        onChange={handleFieldChange}
+        autoComplete="on"
+      >
+        <Grid container>
+          <Typography variant="h5" gutterBottom>
+            Feedback Form
+          </Typography>
 
-            <Grid container item>
-              <Grid item xs={5.5}>
-                <Grid container direction="column" rowGap={2}>
-                  <Grid item xs={5.5}>
-                    <TextField
-                      fullWidth
-                      label="Name"
-                      name="name"
-                      value={formData.name || ""}
-                      onBlur={() => validateNameField()}
-                      size="small"
-                      error={!!nameError}
-                      helperText={nameError || " "}
-                    />
-                  </Grid>
-
-                  <Grid item xs={5.5}>
-                    <TextField
-                      fullWidth
-                      label="Email Address"
-                      name="email_address"
-                      value={formData.email_address || ""}
-                      onBlur={() => validateEmailField()}
-                      size="small"
-                      error={!!emailError}
-                      helperText={emailError || " "}
-                    />
-                  </Grid>
-
-                  <Grid item xs={5.5}>
-                    <FormControl>
-                      <Rating
-                        name="rating"
-                        getLabelText={getLabelText}
-                        value={formData.rating ? parseInt(formData.rating) : 0}
-                        size="large"
-                        emptyLabelText={"Select rating from 1 to 5"}
-                      />
-                      <FormHelperText error>{ratingError || ""}</FormHelperText>
-                    </FormControl>
-                  </Grid>
+          <Grid container item>
+            <Grid item xs={5.5}>
+              <Grid container direction="column" rowGap={2}>
+                <Grid item xs={5.5}>
+                  <TextField
+                    fullWidth
+                    label="Name"
+                    name="name"
+                    value={formData.name || ""}
+                    onBlur={() => validateNameField()}
+                    size="small"
+                    error={!!nameError}
+                    helperText={nameError || " "}
+                  />
                 </Grid>
-              </Grid>
 
-              <Grid item xs={1} />
+                <Grid item xs={5.5}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    name="email_address"
+                    value={formData.email_address || ""}
+                    onBlur={() => validateEmailField()}
+                    size="small"
+                    error={!!emailError}
+                    helperText={emailError || " "}
+                  />
+                </Grid>
 
-              <Grid item xs={5.5}>
-                <Grid container direction="column">
-                  <Grid item>
-                    <TextField
-                      fullWidth
-                      label="Comment"
-                      multiline
-                      name="comment"
-                      rows={7}
-                      value={formData.comment || ""}
-                      onBlur={() => validateCommentField()}
-                      error={!!commentError}
-                      helperText={commentError || " "}
+                <Grid item xs={5.5}>
+                  <FormControl>
+                    <Rating
+                      name="rating"
+                      getLabelText={getLabelText}
+                      value={formData.rating ? parseInt(formData.rating) : 0}
+                      size="large"
+                      emptyLabelText={"Select rating from 1 to 5"}
                     />
-                  </Grid>
+                    <FormHelperText error>{ratingError || ""}</FormHelperText>
+                  </FormControl>
                 </Grid>
               </Grid>
             </Grid>
 
-            <Grid container direction="row" justifyContent="flex-end">
-              <Grid item>
-                <Button variant="contained" type="submit">
-                  Submit
-                </Button>
+            <Grid item xs={1} />
+
+            <Grid item xs={5.5}>
+              <Grid container direction="column">
+                <Grid item>
+                  <TextField
+                    fullWidth
+                    label="Comment"
+                    multiline
+                    name="comment"
+                    rows={7}
+                    value={formData.comment || ""}
+                    onBlur={() => validateCommentField()}
+                    error={!!commentError}
+                    helperText={commentError || " "}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
-        </form>
-      </Grid>
-    </Grid>
+
+          <Grid container direction="row" justifyContent="flex-end">
+            <Grid item>
+              <Button variant="contained" type="submit">
+                Submit
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+      </form>
+    </Container>
   );
 }
 
