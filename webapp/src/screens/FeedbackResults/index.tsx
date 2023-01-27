@@ -65,7 +65,7 @@ function FeedbackResults() {
 
       <Box sx={{ height: "100vh" }}>
         <Box sx={{ display: "flex", flexDirection: "column", rowGap: 2 }}>
-          {reviews.length && (
+          {reviews.length > 0 ? (
             <Box role="region" aria-label={reviews.length ? `PieChart representation of ${reviews.length} reviews` : undefined} tabIndex={0}>
               {/* TODO: Reorder data for pie and for labels by rating (Poor, Bad, Average, Good, Excellent) */}
               <PieChart
@@ -77,7 +77,7 @@ function FeedbackResults() {
                 withTooltip
               />
             </Box>
-          )}
+          ) : null}
 
           {/* TODO: Extract separate Timeline component  */}
           <Box aria-label={`Timeline ${reviews.length} reviews`} role="region" tabIndex={0}>
