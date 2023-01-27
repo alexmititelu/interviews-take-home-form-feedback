@@ -1,1 +1,0 @@
-# interviews-take-home-checkout
