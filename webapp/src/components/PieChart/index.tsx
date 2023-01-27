@@ -34,6 +34,7 @@ function PieChart(props: Props) {
       }}
     >
       {props.headline && <Typography variant="h6">{props.headline}</Typography>}
+      {/* TODO: Open API to control layout of the chart */}
       <ResponsiveContainer width="100%" height={250}>
         <PieChartRecharts width={250} height={250}>
           <Pie

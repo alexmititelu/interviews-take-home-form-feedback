@@ -28,16 +28,8 @@ interface FormData {
   comment: string;
 }
 
-interface FormDataErrors {
-  name?: string;
-  email_address?: string;
-  rating?: string;
-  comment?: string;
-}
-
 function FeedbackForm() {
   const [formData, setFormData] = React.useState<Partial<FormData>>({});
-  const [formErrors, setFormErrors] = React.useState<FormDataErrors>({});
   const [nameError, setNameError] = React.useState<string>();
   const [emailError, setEmailError] = React.useState<string>();
   const [commentError, setCommentError] = React.useState<string>();
@@ -45,6 +37,8 @@ function FeedbackForm() {
 
   const navigate = useNavigate();
 
+  // TODO: Define form inputs schema by name (with synthacthic and semantic validation) and generate the form
+  // from there (dynamically)
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const nameErr = validateNameField();
@@ -74,15 +68,12 @@ function FeedbackForm() {
   const handleFieldChange = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     const value = e.target.value;
-    const fieldName = e.target.name;
+    const fieldName = e.target.name as keyof FormData;
     setFormData({
       ...formData,
       [fieldName]: value,
     });
-    setFormErrors({
-      ...formErrors,
-      [fieldName]: undefined,
-    });
+    clearFieldError(fieldName);
   };
 
   const handleFieldValidation = (
@@ -138,6 +129,26 @@ function FeedbackForm() {
     return err;
   };
 
+  const clearFieldError = (name: keyof FormData) => {
+    switch (name) {
+      case "name":
+        setNameError("");
+        return;
+
+      case "email_address":
+        setEmailError("");
+        return;
+      case "rating":
+        setRatingError("");
+        return;
+      case "comment":
+        setCommentError("");
+        return;
+      default:
+        return;
+    }
+  };
+
   return (
     <Container
       style={{
@@ -147,11 +158,14 @@ function FeedbackForm() {
         alignItems: "center",
       }}
       maxWidth="md"
+      aria-label="User Feedback collection page"
     >
       <form
         onSubmit={handleSubmit}
         onChange={handleFieldChange}
         autoComplete="on"
+        aria-label="Form for collecting user feedback"
+        tab-index={0}
       >
         <Grid container>
           <Typography variant="h5" gutterBottom>
@@ -171,6 +185,9 @@ function FeedbackForm() {
                     size="small"
                     error={!!nameError}
                     helperText={nameError || " "}
+                    FormHelperTextProps={{
+                      "aria-label": nameError,
+                    }}
                   />
                 </Grid>
 
@@ -183,7 +200,11 @@ function FeedbackForm() {
                     onBlur={() => validateEmailField()}
                     size="small"
                     error={!!emailError}
+                    type="email"
                     helperText={emailError || " "}
+                    FormHelperTextProps={{
+                      "aria-label": emailError,
+                    }}
                   />
                 </Grid>
 
@@ -196,7 +217,9 @@ function FeedbackForm() {
                       size="large"
                       emptyLabelText={"Select rating from 1 to 5"}
                     />
-                    <FormHelperText error>{ratingError || ""}</FormHelperText>
+                    <FormHelperText error aria-label={ratingError}>
+                      {ratingError || ""}
+                    </FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
@@ -217,6 +240,9 @@ function FeedbackForm() {
                     onBlur={() => validateCommentField()}
                     error={!!commentError}
                     helperText={commentError || " "}
+                    FormHelperTextProps={{
+                      "aria-label": commentError,
+                    }}
                   />
                 </Grid>
               </Grid>

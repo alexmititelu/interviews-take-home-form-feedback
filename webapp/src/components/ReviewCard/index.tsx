@@ -10,10 +10,9 @@ function ReviewCard({ header, description }: Props) {
   return (
     <Box>
       {/* TODO: Use theming */}
-
       <Typography
         variant="h6"
-        sx={{ color: "#37474f", overflowWrap: "break-word" }}
+        sx={{ color: "#757575", overflowWrap: "break-word" }}
       >
         {header}
       </Typography>

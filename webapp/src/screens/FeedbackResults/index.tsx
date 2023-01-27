@@ -6,6 +6,8 @@ import LineBreak from "../../components/LineBreak";
 import { labels as ratingLabels } from "../FeedbackForm";
 import PieChart from "../../components/PieChart";
 
+// TODO: Explore type safety
+// TODO: use theming
 const COLOR_BY_LABEL = {
   [ratingLabels[1]]: "#B60303",
   [ratingLabels[2]]: "#DC6D23",
@@ -44,7 +46,7 @@ function FeedbackResults() {
   }, []);
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="md" tabIndex={0} aria-label="Feedback results page">
       <Box
         sx={{
           marginTop: "5em",
@@ -62,28 +64,36 @@ function FeedbackResults() {
       </Box>
 
       <Box sx={{ height: "100vh" }}>
-        <Box sx={{ display: "flex", flexDirection: "column", rowGap: 2 }} >
-          <Box>
-            {reviews.length && (<PieChart
-              data={getFormattedData()}
-              colorMapping={COLOR_BY_LABEL}
-              label={`${reviews.length} reviews`}
-              headline="Total Rating Distribution"
-              withLegend
-              withTooltip
-            />)}
-          </Box>
-
-          <Box>
-            <Typography variant="h5">Latest Comments</Typography>
-          </Box>
-
-          {reviews.map((review, idx) => (
-            <Box key={`${idx}_${review.email_address}`}>
-              <ReviewCard header={review.name} description={review.comment} />
-              {idx !== reviews.length - 1 && <LineBreak size="small" />}
+        <Box sx={{ display: "flex", flexDirection: "column", rowGap: 2 }}>
+          {reviews.length && (
+            <Box role="region" aria-label={reviews.length ? `PieChart representation of ${reviews.length} reviews` : undefined} tabIndex={0}>
+              {/* TODO: Reorder data for pie and for labels by rating (Poor, Bad, Average, Good, Excellent) */}
+              <PieChart
+                data={getFormattedData()}
+                colorMapping={COLOR_BY_LABEL}
+                label={`${reviews.length} reviews`}
+                headline="Total Rating Distribution"
+                withLegend
+                withTooltip
+              />
             </Box>
-          ))}
+          )}
+
+          {/* TODO: Extract separate Timeline component  */}
+          <Box aria-label={`Timeline ${reviews.length} reviews`} role="region" tabIndex={0}>
+            <Box>
+              <Typography variant="h5">Latest Comments</Typography>
+            </Box>
+            {/* TODO: Introduce pagination / load more reviews  */}
+            {reviews.length > 0 ? (reviews.map((review, idx) => (
+              <Box key={`${idx}_${review.email_address}`} role="article" tabIndex={0} aria-label={`Review from ${review.name} "${review.comment}"`} >
+                <ReviewCard header={review.name} description={review.comment} />
+                {idx !== reviews.length - 1 && <LineBreak size="small" />}
+              </Box>
+            ))) : (
+              <Typography variant="h6">No reviews so far. Please come back later!</Typography>
+            )}
+          </Box>
         </Box>
       </Box>
     </Container>

@@ -22,7 +22,7 @@ function LineBreak({ size }: Props) {
     <Box
       style={{
         // TODO: Use theming
-        borderBottom: "2px solid #37474f",
+        borderBottom: "2px solid #e0e0e0",
         width: getWidthPercentage(),
         margin: "auto",
       }}
