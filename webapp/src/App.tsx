@@ -1,7 +1,6 @@
 import React from "react";
 import FeedbackForm from "./screens/FeedbackForm";
 import FeedbackResults from "./screens/FeedbackResults";
-import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 const FeedbackFormScreen = () => <FeedbackForm />;
