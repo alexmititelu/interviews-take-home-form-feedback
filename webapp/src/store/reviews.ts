@@ -1,4 +1,5 @@
 export interface Review {
+  created_at: string;
   name: string;
   email_address: string;
   rating: number;
@@ -10,7 +11,13 @@ export class ReviewsAPI {
     const json = localStorage.getItem("reviews-data");
     if (!json) return [];
 
-    return JSON.parse(json);
+    try {
+      return JSON.parse(json);
+    } catch (error) {
+      // Malformed JSONs
+      console.log(error);
+      return [];
+    }
   }
 
   private static save(reviews: Array<Review>) {
@@ -21,9 +28,15 @@ export class ReviewsAPI {
     return this.read();
   }
 
-  static add(review: Review) {
+  static add(reviewData: Omit<Review, "created_at">) {
     const reviews = this.getAll();
-    reviews.push(review);
+
+    const newReview: Review = {
+      ...reviewData,
+      created_at: new Date().toISOString(),
+    };
+
+    reviews.push(newReview);
     this.save(reviews);
   }
 }

@@ -2,11 +2,12 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 
 interface Props {
-  header: string;
+  title: string;
+  subtitle?: string;
   description: string;
 }
 
-function ReviewCard({ header, description }: Props) {
+function ReviewCard({ title, subtitle, description }: Props) {
   return (
     <Box>
       {/* TODO: Use theming */}
@@ -14,12 +15,19 @@ function ReviewCard({ header, description }: Props) {
         variant="h6"
         sx={{ color: "#757575", overflowWrap: "break-word" }}
       >
-        {header}
+        {title}
       </Typography>
 
-      <Typography paragraph sx={{ overflowWrap: "break-word" }}>
-        {description}
-      </Typography>
+      {subtitle && (
+        <Typography
+          variant="subtitle1"
+          sx={{ color: "#90a4ae", overflowWrap: "break-word" }}
+        >
+          {subtitle}
+        </Typography>
+      )}
+
+      <Typography component="pre">{description}</Typography>
     </Box>
   );
 }
