@@ -1,17 +1,16 @@
 import React from "react";
-import {
-  FormHelperText,
-  FormControl,
-  TextField,
-  Grid,
-  Typography,
-  Rating,
-  Button,
-  Container,
-} from "@mui/material";
-import validator from "validator";
+import { Button, Container, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ReviewsAPI } from "./../../store/reviews";
+import { Review, ReviewsAPI } from "./../../store/reviews";
+import Form, { FormContext } from "./../../components/Form";
+import validator from "validator";
+
+interface FeedbackFormData {
+  name: string;
+  email_address: string;
+  rating: string;
+  comment: string;
+}
 
 export const labels: { [index: string]: string } = {
   1: "Bad",
@@ -21,133 +20,73 @@ export const labels: { [index: string]: string } = {
   5: "Excellent",
 };
 
-interface FormData {
-  name: string;
-  email_address: string;
-  rating: string;
-  comment: string;
-}
+const getLabelText = (value: number) => {
+  return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
+};
+
+type FormReview = Pick<Review, "name" | "comment" | "email_address" | "rating">;
 
 function FeedbackForm() {
-  const [formData, setFormData] = React.useState<Partial<FormData>>({});
-  const [nameError, setNameError] = React.useState<string>();
-  const [emailError, setEmailError] = React.useState<string>();
-  const [commentError, setCommentError] = React.useState<string>();
-  const [ratingError, setRatingError] = React.useState<string>();
-
   const navigate = useNavigate();
 
-  // TODO: Define form inputs schema by name (with synthacthic and semantic validation) and generate the form
-  // from there (dynamically)
-  const handleSubmit = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    const nameErr = validateNameField();
-    const emailErr = validateEmailField();
-    const commentErr = validateCommentField();
-    const ratingErr = validateRatingField();
-
-    const hasErrors = !!(nameErr || emailErr || commentErr || ratingErr);
-
-    if (!hasErrors) {
-      // This is just for type safety -- TODO: find better alternative
-      const review = {
-        name: formData.name || "",
-        comment: formData.comment || "",
-        email_address: formData.email_address || "",
-        rating: formData.rating ? parseInt(formData.rating) : 0,
-      };
-      ReviewsAPI.add(review);
-      navigate("/results");
-    }
+  const handleSubmit = ({
+    name,
+    email_address,
+    comment,
+    rating,
+  }: FeedbackFormData) => {
+    const review: FormReview = {
+      name,
+      email_address,
+      comment,
+      rating: parseInt(rating) || 0,
+    };
+    ReviewsAPI.add(review);
+    navigate("/results");
   };
 
-  const getLabelText = (value: number) => {
-    return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
-  };
-
-  const handleFieldChange = (e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const value = e.target.value;
-    const fieldName = e.target.name as keyof FormData;
-    setFormData({
-      ...formData,
-      [fieldName]: value,
-    });
-    clearFieldError(fieldName);
-  };
-
-  const handleFieldValidation = (
-    fieldName: any,
-    {
-      errorMessage,
-      validatorFn,
-      validatorOptions,
-    }: { validatorFn: any; validatorOptions?: any; errorMessage: string }
-  ) => {
-    // @ts-ignore
-    return validatorFn(formData[fieldName] || " ", validatorOptions)
-      ? undefined
-      : errorMessage;
-  };
-
-  const validateNameField = () => {
-    const err = handleFieldValidation("name", {
-      validatorFn: validator.isLength,
-      validatorOptions: { min: 3, max: 256 },
-      errorMessage: "Please enter your name",
-    });
-
-    setNameError(err);
-    return err;
-  };
-
-  const validateEmailField = () => {
-    const err = handleFieldValidation("email_address", {
-      validatorFn: validator.isEmail,
-      errorMessage: "Invalid email",
-    });
-    setEmailError(err);
-    return err;
-  };
-
-  const validateCommentField = () => {
-    const err = handleFieldValidation("comment", {
-      validatorFn: validator.isLength,
-      validatorOptions: { min: 10 },
-      errorMessage: "Minimum 10 characters",
-    });
-    setCommentError(err);
-    return err;
-  };
-
-  const validateRatingField = () => {
-    const possibleValues = ["1", "2", "3", "4", "5"];
-    let err;
-    if (!formData.rating || !possibleValues.includes(formData.rating))
-      err = "Please choose a rating";
-    setRatingError(err);
-    return err;
-  };
-
-  const clearFieldError = (name: keyof FormData) => {
-    switch (name) {
-      case "name":
-        setNameError("");
-        return;
-
-      case "email_address":
-        setEmailError("");
-        return;
-      case "rating":
-        setRatingError("");
-        return;
-      case "comment":
-        setCommentError("");
-        return;
-      default:
-        return;
-    }
-  };
+  const formConfig = React.useMemo(
+    (): React.ComponentProps<typeof Form>["config"] => ({
+      name: {
+        label: "Name",
+        type: "text",
+        validateFn: (value: string) => {
+          // when value's length is in range, returns true
+          const isValueValid = validator.isLength(value, {
+            min: 3,
+            max: 256,
+          });
+          return isValueValid ? undefined : "Please enter your name";
+        },
+      },
+      email_address: {
+        label: "Email Address",
+        type: "text",
+        validateFn: (value: string) => {
+          const isValueValid = validator.isEmail(value);
+          return isValueValid ? undefined : "Invalid email";
+        },
+      },
+      comment: {
+        label: "Comment",
+        type: "textarea",
+        validateFn: (value: string) => {
+          // when value's length is >=10 then validator fn returns true
+          const isValueValid = validator.isLength(value, { min: 10 });
+          return isValueValid ? undefined : "Minimum 10 characters";
+        },
+      },
+      rating: {
+        label: "Rating",
+        type: "rating",
+        validateFn: (value: string) => {
+          const possibleValues = ["1", "2", "3", "4", "5"];
+          if (!possibleValues.includes(value)) return "Please choose a rating";
+        },
+      },
+    }),
+    []
+  );
 
   return (
     <Container
@@ -160,104 +99,75 @@ function FeedbackForm() {
       maxWidth="md"
       aria-label="User Feedback collection page"
     >
-      <form
+      <Form
+        accessibilityLabel="Form for collecting user feedback"
+        config={formConfig}
+        // @ts-ignore explore generics solution
         onSubmit={handleSubmit}
-        onChange={handleFieldChange}
-        autoComplete="on"
-        aria-label="Form for collecting user feedback"
-        tab-index={0}
+        title="Feedback Form"
       >
-        <Grid container>
-          <Typography variant="h5" gutterBottom>
-            Feedback Form
-          </Typography>
-
-          <Grid container item>
-            <Grid item xs={5.5}>
-              <Grid container direction="column" rowGap={2}>
+        <FormContext.Consumer>
+          {({ getFieldByName }) => (
+            <>
+              <Grid container item>
                 <Grid item xs={5.5}>
-                  <TextField
-                    fullWidth
-                    label="Name"
-                    name="name"
-                    value={formData.name || ""}
-                    onBlur={() => validateNameField()}
-                    size="small"
-                    error={!!nameError}
-                    helperText={nameError || " "}
-                    FormHelperTextProps={{
-                      "aria-label": nameError,
-                    }}
-                  />
+                  <Grid container direction="column" rowGap={2}>
+                    <Grid item xs={5.5}>
+                      {getFieldByName("name", {
+                        props: {
+                          fullWidth: true,
+                          size: "small",
+                        },
+                      })}
+                    </Grid>
+
+                    <Grid item xs={5.5}>
+                      {getFieldByName("email_address", {
+                        props: {
+                          fullWidth: true,
+                          size: "small",
+                        },
+                      })}
+                    </Grid>
+
+                    <Grid item xs={5.5}>
+                      {getFieldByName("rating", {
+                        props: {
+                          getLabelText,
+                          size: "large",
+                        },
+                      })}
+                    </Grid>
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={5.5}>
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    name="email_address"
-                    value={formData.email_address || ""}
-                    onBlur={() => validateEmailField()}
-                    size="small"
-                    error={!!emailError}
-                    type="email"
-                    helperText={emailError || " "}
-                    FormHelperTextProps={{
-                      "aria-label": emailError,
-                    }}
-                  />
-                </Grid>
+                <Grid item xs={1} />
 
                 <Grid item xs={5.5}>
-                  <FormControl>
-                    <Rating
-                      name="rating"
-                      getLabelText={getLabelText}
-                      value={formData.rating ? parseInt(formData.rating) : 0}
-                      size="large"
-                      emptyLabelText={"Select rating from 1 to 5"}
-                    />
-                    <FormHelperText error aria-label={ratingError}>
-                      {ratingError || ""}
-                    </FormHelperText>
-                  </FormControl>
+                  <Grid container direction="column">
+                    <Grid item>
+                      {getFieldByName("comment", {
+                        props: {
+                          fullWidth: true,
+                          rows: 7,
+                        },
+                      })}
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
 
-            <Grid item xs={1} />
-
-            <Grid item xs={5.5}>
-              <Grid container direction="column">
+              <Grid container item direction="row" justifyContent="flex-end">
                 <Grid item>
-                  <TextField
-                    fullWidth
-                    label="Comment"
-                    multiline
-                    name="comment"
-                    rows={7}
-                    value={formData.comment || ""}
-                    onBlur={() => validateCommentField()}
-                    error={!!commentError}
-                    helperText={commentError || " "}
-                    FormHelperTextProps={{
-                      "aria-label": commentError,
-                    }}
-                  />
+                  <Button variant="contained" type="submit">
+                    Submit
+                  </Button>
                 </Grid>
               </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid container direction="row" justifyContent="flex-end">
-            <Grid item>
-              <Button variant="contained" type="submit">
-                Submit
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
-      </form>
+            </>
+          )}
+        </FormContext.Consumer>
+      </Form>
     </Container>
   );
 }
